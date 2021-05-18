@@ -1,0 +1,50 @@
+int rc=0;                     // init to 0; number of readers currently accessing resource(database)
+
+// all binary semaphores initialised to 1
+semaphore rw_mutex;           //  functions as a mutual exclusion semaphore for the writers, also prevents read operation when the database is being modified.
+semaphore r_mutex;            //  ensure mutual exclusion when the variable read count(rc) is updated
+semaphore FIFO;               //  ensures FAIRNESS by preserving ordering of requests (signaling must be FIFO)
+
+
+// P operation is also called wait, sleep, or down operation, and V operation is also called signal, wake-up, or up operation.
+// Both operations are atomic and semaphore is always initialized to one. Atomic means that variable on which read, modify
+// and update happens at the same time/moment with no pre-emption
+// P semaphore function signals that the task requires a resource and if not available waits for it. 
+// V semaphore function signals frees the semaphore to be held by other processes.
+
+//READER
+reader() {
+  \*ENTRY SECTION*\
+  
+  FIFO.P();                   // wait in line to be serviced
+  r_mutex.P();                // request exclusive access to readcount before entering critical section
+  rc++;                       // Increment the count of active readers(readcount)
+  if (rc == 1)                // Check for first reader
+    rw_mutex.P();             // request resource access for readers (writers blocked)
+  FIFO.V();                   // Next in line is serviced
+  r_mutex.V();                // Access to rc is released
+    
+\*CRITICAL SECTION*\
+//reading is performed
+    
+\*EXIT Section*\
+  r_mutex.P();                 // request exclusive access to readcount
+  rc--;                        // Decrement the count of active readers
+  if (rc == 0)                 // If no readers are left
+    rw_mutex.V();              // Resource/Database is released for access by others 
+  r_mutex.V();                 //  Access to rc is released
+}
+
+//WRITER
+writer() {
+\*ENTRY SECTION*\
+  FIFO.P();                   // wait in line to be serviced
+  rw_mutex.P();               // Wait until there is no writer or reader using the Critical Section
+  FIFO.V();                   // let next in line be serviced
+    
+\*CRITICAL SECTION*\
+// writing is performed
+    
+ \*EXIT Section*\
+  rw_mutex.V();               // release resource access for next reader/writer
+}
