@@ -10,7 +10,6 @@ A solution to either the first readers-writers problem or the second readers-wri
 In the first case, writers might starve whereas in the second case, readers might starve.
 
 The third Readers-Writers problem adds the constraint that no thread shall be allowed to starve; that is, the operation of obtaining a lock on the shared data 
-will always terminate in a bounded amount of time. In solution provided, we can see how mutual excluison and bounded waiting are taken care of using binary semaphores
-and no starvation occurs.
+will always terminate in a bounded amount of time. In solution provided, we can see how mutual excluison and bounded waiting are taken care of using binary semaphores and mutex locks thereby preventing starvation overall.
 
 
