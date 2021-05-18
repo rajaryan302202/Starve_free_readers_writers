@@ -19,7 +19,7 @@ reader() {
   FIFO.P();                   // wait in line to be serviced
   r_mutex.P();                // request exclusive access to readcount before entering critical section
   rc++;                       // Increment the count of active readers(readcount)
-  if (rc == 1)                // Check for first reader
+  if (rc == 1)                // Check if first reader to enter the database
     rw_mutex.P();             // request resource access for readers (writers blocked)
   FIFO.V();                   // Next in line is serviced
   r_mutex.V();                // Access to rc is released
@@ -32,7 +32,7 @@ reader() {
   rc--;                        // Decrement the count of active readers
   if (rc == 0)                 // If no readers are left
     rw_mutex.V();              // Resource/Database is released for access by others 
-  r_mutex.V();                 //  Access to rc is released
+  r_mutex.V();                 // Access to rc is released
 }
 
 //WRITER
